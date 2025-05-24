@@ -102,6 +102,29 @@ async function run() {
       res.send(result);
     });
 
+app.patch("/groups/addmember/:id", async (req, res) => {
+  const id = req.params.id;
+  const newMember = req.body;
+
+  const result = await groups.updateOne(
+    { _id: new ObjectId(id) },
+    { $push: { member_name: newMember } },
+    { upsert: false }
+  );
+
+  res.send(result);
+});
+
+
+
+
+
+
+
+
+
+
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
@@ -112,6 +135,7 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.listen(port, function () {
-  console.log(` web server listening on port ${port}`);
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
+
