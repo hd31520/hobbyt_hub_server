@@ -1,17 +1,12 @@
 
-// hobbyhub
-// LsAOfHViKq6pdi7E
-// const uri = "mongodb+srv://hobbyhub:LsAOfHViKq6pdi7E@cluster0.v2f3c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 
-// Load environment variables
-// require('dotenv').config();.groups
 
 
-const express = require('express');
-const cors = require('cors');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-
+const express = require("express");
+const cors = require("cors");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,19 +15,11 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-
-
-
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
-
-
-
-
-const uri = "mongodb+srv://hobbyhub:LsAOfHViKq6pdi7E@cluster0.v2f3c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri =process.env.URI;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -40,7 +27,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
@@ -49,35 +36,40 @@ async function run() {
     await client.connect();
     // Send a ping to confirm a successful connection
 
- const database = client.db("HobbyHub");
+    const database = client.db("HobbyHub");
     const groups = database.collection("groups");
 
-    app.get('/groups', async(req,res) => {
+    app.get("/groups", async (req, res) => {
       const result = await groups.find().toArray();
       res.send(result);
+    });
+
+    app.get("/group/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await groups.findOne(query);
+      console.log(id);
+      res.send(result);
+    });
+
+    app.post('/groups/add', async(req, res) => {
+      const data = req.body;
+      const result = await groups.insertOne(data);
+      console.log(result);
+      res.send(result);
+
     })
 
-  app.get('/group/:id', async(req, res) => {
-    const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-    const result = await groups.findOne(query);
-    console.log(id)
-    res.send(result)
-  })
-
-  
-
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
-   
   }
 }
 run().catch(console.dir);
 
-
-
 app.listen(port, function () {
-  console.log(` web server listening on port ${port}`)
-})
+  console.log(` web server listening on port ${port}`);
+});
